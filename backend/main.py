@@ -1,10 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database import Base, engine
+from app.models.user import User
+
+from app.routers import auth, users, matching, messages
+
+# Création automatique des tables SQLAlchemy
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="IFRI_MentorLink API",
     version="1.0.0",
-    description="IFRI_MentorLink API")
+    description="IFRI_MentorLink API"
+)
 
 # Middleware CORS
 # allow_origins=["*"] en développement
@@ -16,9 +25,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-from app.routers import auth, users, matching, messages
 
 @app.get("/")
 def root():
@@ -33,3 +39,11 @@ def health_check():
     return {
         "status": "healthy"
     }
+
+# Inclusion des routers
+app.include_router(auth.router)
+
+# En production :
+# app.include_router(users.router)
+# app.include_router(matching.router)
+# app.include_router(messages.router)

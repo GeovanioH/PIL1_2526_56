@@ -1,5 +1,5 @@
+#Importation des fonctions et blocs de données à utiliser des bibliothèques et fichiers
 from fastapi import APIRouter, Depends, HTTPException, status
-# On importe nos schémas tout neufs !
 from backend.app.schemas.user_schema import ProfileBase, ProfileUpdate
 from backend.app.services.auth_service import get_current_user
 
@@ -8,7 +8,7 @@ router = APIRouter(
     tags=["users"]
 )
 
-# Simulation d'une base de données temporaire pour nos tests
+# Création d'un profil-test pour simuler la base en attendant
 fake_profile_db = {
     "name": "Jean Dupont",
     "email": "jean.dupont@example.com",
@@ -25,13 +25,11 @@ def get_my_profile(current_user: dict = Depends(get_current_user)):
     """
     # Pour l'instant, on renvoie notre faux profil qui respecte la structure ProfileBase
     return fake_profile_db
-
+#Mise à jour s'il y a lieu des données de l'utilisation
 @router.put("/me", response_model=ProfileBase)
 def update_my_profile(profile_data: ProfileUpdate, current_user: dict = Depends(get_current_user)):
-    # On met à jour uniquement les champs envoyés par l'utilisateur
     for key, value in profile_data.dict(exclude_unset=True).items():
         fake_profile_db[key] = value
-        
     return fake_profile_db
 
 @router.get("/{id}", response_model=ProfileBase)

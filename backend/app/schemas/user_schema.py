@@ -1,3 +1,4 @@
+#Importation des fonctions à utiliser des bibliothèques Pydantic et typing
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 

@@ -1,0 +1,10 @@
+CREATE INDEX idx_users_email ON utilisateurs(email);
+CREATE INDEX idx_users_filiere ON utilisateurs(filiere);
+CREATE INDEX idx_competences_utilisateur ON competences(utilisateur_id);
+CREATE INDEX idx_disponibilites_utilisateur ON disponibilites(utilisateur_id);
+CREATE INDEX idx_offres_utilisateur ON offres_mentorat(utilisateur_id);
+CREATE INDEX idx_demandes_utilisateur ON demandes_mentorat(utilisateur_id);
+CREATE INDEX idx_matchings_mentor ON matchings(mentor_id);
+CREATE INDEX idx_matchings_mentore ON matchings(mentore_id);
+CREATE INDEX idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX idx_messages_envoye_a ON messages(envoye_a);

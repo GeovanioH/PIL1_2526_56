@@ -39,5 +39,5 @@ def get_user_profile(id: int):
     return fake_profile_db
 
 @router.get("/admin/all")
-def get_all_profiles(admin_user: dict = Depends(verify_admin_role));
+def get_all_profiles(admin_user: dict = Depends(verify_admin_role)):
     return{"message": "Accès autorisé","profiles": [fake_profile_db]}

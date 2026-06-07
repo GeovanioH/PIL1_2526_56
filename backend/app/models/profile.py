@@ -4,9 +4,10 @@ from database import Base
 
 #Création du nouveau type de variable Competence et de la table competences avec ses attributs et la clé étrangère de la table users
 class Competence(Base):
-    __tablename__ = "Competences"
-    id = Column(Integer, primary_key=True,index=True)
-    nom = Column(String,nullable = False)
+    __tablename__ = "competences"
+    id = Column(Integer, primary_key=True, index=True)
+    nom = Column(String, nullable=False)        
+    niveau = Column(String, nullable=True)      
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
 #Création du nouveau type de variable Lacune et de la table lacunes avec ses attributs et la clé étrangère de la table users

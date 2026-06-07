@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import PyJWTError as JWTError
 from backend.app.services.auth_service import SECRET_KEY, ALGORITHM
 
 # FastAPI va chercher le token sur la route de connexion d'Huriel

@@ -1,8 +1,5 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy import JSON
+from sqlalchemy import Column, Integer, String, Text, JSON, Boolean, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -11,78 +8,33 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
+    id = Column(Integer, primary_key=True, index=True)
+    nom = Column(String(255), nullable=False)
+    prenom = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    telephone = Column(String(50), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    filiere = Column(String(255), nullable=False)
+    niveau = Column(String(100), nullable=False)
+    bio = Column(Text, nullable=True)
+    photo_url = Column(String(500), nullable=True)
+    competences = Column(JSON, nullable=True, default=list)
+    lacunes = Column(JSON, nullable=True, default=list)
+    disponibilites = Column(JSON, nullable=True, default=list)
 
-    nom = Column(
-        String(255),
-        nullable=False
-    )
+    # Reset mot de passe
+    reset_token = Column(String(255), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
 
-    prenom = Column(
-        String(255),
-        nullable=False
-    )
+    # Refresh token
+    refresh_token = Column(String(500), nullable=True)
 
-    email = Column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True
-    )
+    created_at = Column(DateTime, server_default=func.now())
 
-    telephone = Column(
-        String(50),
-        nullable=False
-    )
-
-    password_hash = Column(
-        String(255),
-        nullable=False
-    )
-
-    filiere = Column(
-        String(255),
-        nullable=False
-    )
-
-    niveau = Column(
-        String(100),
-        nullable=False
-    )
-
-    bio = Column(
-        Text,
-        nullable=True
-    )
-
-    photo_url = Column(
-        String(500),
-        nullable=True
-    )
-    competences = Column(
-        JSON, 
-        nullable=True
-    )
-
-    lacunes = Column(
-        JSON, 
-        nullable=True
-    )
-
-    disponibilites = Column(
-        JSON,
-        nullable=True
-    )
-    offres = relationship(
-    "Offre",
-    back_populates="user"
-    )
-
-    demandes = relationship(
-        "Demande",
-        back_populates="user"
-    )
+    # Relations
+    offres = relationship("Offre", back_populates="user", cascade="all, delete-orphan")
+    demandes = relationship("Demande", back_populates="user", cascade="all, delete-orphan")
+    participations = relationship("ParticipantConversation", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    reponses_offres = relationship("ReponseOffre", back_populates="repondant", cascade="all, delete-orphan")
+    reponses_demandes = relationship("ReponseDemande", back_populates="repondant", cascade="all, delete-orphan")

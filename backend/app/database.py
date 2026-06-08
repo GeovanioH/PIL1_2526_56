@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.pool import QueuePool
 from dotenv import load_dotenv
 import os
 
@@ -17,26 +16,16 @@ if not DATABASE_URL:
 
 # Engine SQLAlchemy
 engine = create_engine(
-
     DATABASE_URL,
-    # Affiche les requêtes SQL
+    # Affiche les requêtes SQL — mettre False en production
     echo=True,
     # Nombre de connexions permanentes
     pool_size=10,
     # Connexions supplémentaires temporaires
     max_overflow=10,
-    # Vérifie que la connexion est encore valide
+    # Vérifie que la connexion est encore valide avant usage
     pool_pre_ping=True,
-
-    # EN PRODUCTION
-    # En production :
-    # echo=False
-    # pool_size=20 ou plus
-    # Ajouter :
-    # pool_recycle=3600
-    # Utiliser variables environnement sécurisées
 )
-
 
 # Factory de sessions SQLAlchemy
 SessionLocal = sessionmaker(
@@ -48,15 +37,14 @@ SessionLocal = sessionmaker(
 # Base ORM pour tous les modèles
 Base = declarative_base()
 
+
 def get_db():
     """
-    Crée une session DB par requête
-    puis la ferme automatiquement.
+    Générateur : crée une session DB par requête
+    et la ferme automatiquement après usage.
     """
     db = SessionLocal()
-
     try:
         yield db
-
     finally:
         db.close()

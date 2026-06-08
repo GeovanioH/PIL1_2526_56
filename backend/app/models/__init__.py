@@ -1,7 +1,9 @@
 from .user import User
 from .offre import Offre
 from .demande import Demande
-
 from .conversations import Conversation
 from .messages import Message
 from .participants_conversation import ParticipantConversation
+from .notification import Notification
+from .reponse_offre import ReponseOffre
+from .reponse_demande import ReponseDemande

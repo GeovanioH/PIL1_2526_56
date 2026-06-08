@@ -5,19 +5,21 @@ from app.database import Base
 
 
 class Conversation(Base):
+
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, index=True)
 
     created_at = Column(DateTime, server_default=func.now())
 
-    # relations ORM
+    # Relation vers les messages de la conversation
     messages = relationship(
         "Message",
         back_populates="conversation",
         cascade="all, delete"
     )
 
+    # Relation vers la table de liaison participants_conversation
     participants = relationship(
         "ParticipantConversation",
         back_populates="conversation",

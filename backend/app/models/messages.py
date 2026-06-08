@@ -5,6 +5,7 @@ from app.database import Base
 
 
 class Message(Base):
+
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -23,6 +24,7 @@ class Message(Base):
 
     contenu = Column(Text, nullable=False)
 
+    # CDC : permet de savoir si le message a été lu (notifications)
     lu = Column(Boolean, default=False)
 
     envoye_a = Column(DateTime, server_default=func.now())

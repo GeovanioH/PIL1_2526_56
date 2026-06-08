@@ -4,6 +4,7 @@ from app.database import Base
 
 
 class ParticipantConversation(Base):
+
     __tablename__ = "participants_conversation"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -27,5 +28,6 @@ class ParticipantConversation(Base):
 
     user = relationship(
         "User",
-        foreign_keys=[utilisateur_id]
+        foreign_keys=[utilisateur_id],
+        back_populates="participations"
     )

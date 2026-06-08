@@ -1,17 +1,15 @@
 from datetime import datetime, timedelta
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from jose import jwt
 from passlib.context import CryptContext
-
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import RegisterRequest, LoginRequest
-
 from dotenv import load_dotenv
 import os
+from fastapi.security import OAuth2PasswordRequestForm
+
 
 load_dotenv()
 
@@ -114,7 +112,10 @@ def register(
         filiere=user_data.filiere,
         niveau=user_data.niveau,
         bio=user_data.bio,
-        photo_url=user_data.photo_url
+        photo_url=user_data.photo_url,
+        competences=user_data.competences,
+        lacunes=user_data.lacunes,
+        disponibilites=user_data.disponibilites
     )
 
     db.add(new_user)
@@ -131,12 +132,12 @@ def register(
 # Route connexion
 @router.post("/login")
 def login(
-    user_data: LoginRequest,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
 
     user = db.query(User).filter(
-        User.email == user_data.email
+        User.email == form_data.username
     ).first()
 
     if not user:
@@ -146,9 +147,9 @@ def login(
         )
 
     valid_password = verify_password(
-        user_data.password,
-        user.password_hash
-    )
+    form_data.password,
+    user.password_hash
+        )
 
     if not valid_password:
         raise HTTPException(
@@ -158,8 +159,8 @@ def login(
 
     access_token = create_access_token(
         data={
-            "sub": user.email
-        }
+    "user_id": user.id
+    }
     )
 
     return {

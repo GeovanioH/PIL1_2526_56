@@ -2,7 +2,8 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
-
+from sqlalchemy import JSON
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -61,4 +62,27 @@ class User(Base):
     photo_url = Column(
         String(500),
         nullable=True
+    )
+    competences = Column(
+        JSON, 
+        nullable=True
+    )
+
+    lacunes = Column(
+        JSON, 
+        nullable=True
+    )
+
+    disponibilites = Column(
+        JSON,
+        nullable=True
+    )
+    offres = relationship(
+    "Offre",
+    back_populates="user"
+    )
+
+    demandes = relationship(
+        "Demande",
+        back_populates="user"
     )

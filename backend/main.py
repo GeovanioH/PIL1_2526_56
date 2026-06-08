@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.database import Base, engine
 from app.models.user import User
-
-from app.routers import auth, users, matching, messages
+from app.routers import auth, users, matching, messages ,offres, demandes
+from app.models.offre import Offre
+from app.models.demande import Demande
 
 # Création automatique des tables SQLAlchemy
 Base.metadata.create_all(bind=engine)
@@ -42,8 +42,8 @@ def health_check():
 
 # Inclusion des routers
 app.include_router(auth.router)
-
-# En production :
-# app.include_router(users.router)
-# app.include_router(matching.router)
-# app.include_router(messages.router)
+app.include_router(matching.router)
+app.include_router(offres.router)
+app.include_router(demandes.router)
+app.include_router(messages.router)
+#app.include_router(users.router)

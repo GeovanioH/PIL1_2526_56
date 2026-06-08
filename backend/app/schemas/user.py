@@ -11,6 +11,9 @@ class RegisterRequest(BaseModel):
     niveau: str
     bio: str | None = None
     photo_url: str | None = None
+    competences: list[str] | None = None
+    lacunes: list[str] | None = None
+    disponibilites: list[str] | None = None
 
 
 class LoginRequest(BaseModel):

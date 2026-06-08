@@ -1,7 +1,7 @@
 #Importation des fonctions et blocs de données à utiliser des bibliothèques et fichiers
 from fastapi import APIRouter, Depends, HTTPException, status
-from backend.app.schemas.user import ProfileBase, ProfileUpdate
-from backend.app.services.security_service import get_current_user, verify_admin_role
+from app.schemas.users import ProfileBase, ProfileUpdate
+from app.services.security_service import get_current_user, verify_admin_role
 
 router = APIRouter(
     prefix="/users",

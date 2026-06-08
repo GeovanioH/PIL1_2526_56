@@ -1,18 +1,49 @@
-#Importer les fonctions et fichiers des bibliothèques et dossier
 from fastapi import FastAPI
-from backend.app.routers.users import router as users_router
+from fastapi.middleware.cors import CORSMiddleware
 
-#Création de l'application et insération dans la variable app
+from app.database import Base, engine
+from app.models.user import User
+
+from app.routers import auth, users, matching, messages
+
+# Création automatique des tables SQLAlchemy
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
-    title="Plateforme d'Entraide - Backend",
-    description="API pour la gestion des profils (compétences, lacunes, disponibilités)",
-    version="1.0.0"
+    title="IFRI_MentorLink API",
+    version="1.0.0",
+    description="IFRI_MentorLink API"
 )
 
-# On inclut le routeur des utilisateurs dans notre application principale
-app.include_router(users_router)
+# Middleware CORS
+# allow_origins=["*"] en développement
+# À restreindre en production avec l'URL du frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-#Message d'accueil à l'utilisateur
 @app.get("/")
-def read_root():
-    return {"message": "Bienvenue sur l'API d'entraide ! Le backend fonctionne correctement."}
+def root():
+    return {
+        "message": "IFRI_MentorLink API running",
+        "status": "ok",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy"
+    }
+
+# Inclusion des routers
+app.include_router(auth.router)
+
+# En production :
+# app.include_router(users.router)
+# app.include_router(matching.router)
+# app.include_router(messages.router)

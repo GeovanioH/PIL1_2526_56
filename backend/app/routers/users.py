@@ -1,10 +1,11 @@
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
-from app.database import get_db
+from app.database import get_db, PUBLIC_URL
 from app.models.user import User
 from app.models.notification import Notification
 from app.models.blocage import Blocage
@@ -38,7 +39,7 @@ def upload_photo(
     with open(path, "wb") as f:
         f.write(contenu)
 
-    current_user.photo_url = f"http://127.0.0.1:8000/uploads/{filename}"
+    current_user.photo_url = f"{PUBLIC_URL}/uploads/{filename}"
     db.commit()
     return {"photo_url": current_user.photo_url}
 
@@ -128,6 +129,22 @@ def get_my_blocks(
     return {"blocked_ids": [r[0] for r in rows]}
 
 
+@router.get("/by-email")
+def find_user_by_email(
+    email: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trouve un utilisateur par son email (pour démarrer une conversation)."""
+    cible = (email or "").strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == cible).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Aucun utilisateur n'utilise cet email.")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="C'est ta propre adresse email.")
+    return {"id": user.id, "prenom": user.prenom, "nom": user.nom}
+
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user_profile(
     user_id: int,
@@ -137,7 +154,12 @@ def get_user_profile(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-    return user
+
+    resp = UserResponse.model_validate(user)
+    # On masque le numéro des autres s'ils n'ont pas choisi de l'afficher
+    if user.id != current_user.id and not bool(user.afficher_telephone):
+        resp.telephone = None
+    return resp
 
 
 # ── NOTIFICATIONS ─────────────────────────────────────────────────────────────

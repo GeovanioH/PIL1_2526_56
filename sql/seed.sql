@@ -1,10 +1,5 @@
 -- =====================================================================
 --  Données de test IFRI_MentorLink
---  À exécuter APRÈS schema.sql.
---  (les mots de passe sont des hash bcrypt FACTICES pour la démo)
---  Rappel des id de matieres : 1 Python, 2 Algorithmique, 3 Bases de
---  données, 4 SQL, 5 Dév web, 6 HTML/CSS, 7 Java, 8 POO, 9 Maths,
---  10 Statistiques, 11 Réseaux, 12 Anglais
 -- =====================================================================
 
 -- ---------- Utilisateurs ----------

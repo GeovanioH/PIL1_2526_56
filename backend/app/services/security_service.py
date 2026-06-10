@@ -1,44 +1,92 @@
+import os
+import secrets
+from datetime import datetime, timedelta
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import jwt
-from jwt.exceptions import PyJWTError as JWTError
-from app.services.auth_service import SECRET_KEY, ALGORITHM
 
-# FastAPI va chercher le token sur la route de connexion d'Huriel
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+from jose import JWTError, jwt
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+from sqlalchemy.orm import Session
 
-    #Décode le token JWT pour authentifier l'utilisateur et sécuriser l'accès aux routes de l'API.
+from dotenv import load_dotenv
+
+from app.database import get_db
+from app.models.user import User
+
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY est absente du fichier .env")
+
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+REFRESH_TOKEN_EXPIRE_DAYS = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire, "type": "access"})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_refresh_token() -> str:
+    """Génère un refresh token aléatoire sécurisé (256 bits)."""
+    return secrets.token_urlsafe(32)
+
+
+def create_password_reset_token() -> tuple[str, datetime]:
+    """Génère un token de réinitialisation de MDP + expiration (1h)."""
+    token = secrets.token_urlsafe(32)
+    expires = datetime.utcnow() + timedelta(hours=1)
+    return token, expires
+
+
+def verify_access_token(token: str):
+    """Décode le token et retourne l'user_id, ou None si invalide."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "access":
+            return None
+        user_id = payload.get("user_id")
+        if user_id is None:
+            return None
+        return user_id
+    except JWTError:
+        return None
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Token invalide ou expiré",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        # Décodage du jeton avec la clé et l'algorithme d'auth_service
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        
-        if email is None:
-            raise credentials_exception
-            
-        # On retourne un dictionnaire contenant l'identité de l'utilisateur connecté
-        return {"email": email, "id": 1}
-        
-    except JWTError:
+
+    user_id = verify_access_token(token)
+
+    if user_id is None:
         raise credentials_exception
-def verify_admin_role(current_user: dict = Depends(get_current_user)):
-    """
-    Vérifie si l'utilisateur connecté possède le rôle 'admin'.
-    Renvoie une erreur 403 si l'accès est refusé.
-    """
-    # Pour l'instant, on simule le rôle de l'utilisateur
-    user_role = current_user.get("role", "user")
-    
-    if user_role != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Action interdite : droits d'administrateur requis"
-        )
-    return current_user
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if user is None:
+        raise credentials_exception
+
+    return user
+
+
+def get_user_from_websocket_token(token: str, db: Session) -> User | None:
+    """Valide un token JWT depuis un WebSocket (pas de Depends disponible)."""
+    user_id = verify_access_token(token)
+    if user_id is None:
+        return None
+    return db.query(User).filter(User.id == user_id).first()

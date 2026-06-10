@@ -20,7 +20,7 @@ Plateforme web de **mentorat entre étudiants de l'IFRI**. Elle met en relation 
 
 ```
 ifri_mentorlink/
-├── backend/              # L'API 
+├── backend/              # L'API (le "cerveau" + accès base de données)
 │   ├── app/
 │   │   ├── models/       # Les tables décrites en Python (SQLAlchemy)
 │   │   ├── routers/      # Les routes de l'API (auth, users, offres…)

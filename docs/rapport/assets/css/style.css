@@ -1,0 +1,105 @@
+body{
+   margin: 50px;
+   padding: 40px; 
+}
+
+.page1{
+   margin: 20px;
+   padding: 10px;
+   border-style: dotted;
+   border: 3px dotted black;
+   background-color: azure;
+}
+
+.page2{
+   margin: 20px;
+   padding: 10px;
+   border-style: dotted;
+   border: 3px dotted black; 
+}
+
+.developpement{
+   padding: 10px;
+   border-style: dotted;
+   border: 3px dotted black; 
+}
+
+
+.logo{
+    display: flex;
+    gap: 60px;  /*espace entre les photos*/
+}
+
+.logo img{
+    width: 380px;  /*largeur*/
+    height: 150px;
+    object-fit: contain;  /*recadrer l'image */
+    transform: scale(0.8); /* rétrécir l'image sans la modifier*/
+}
+
+.entete{
+    text-align: center;  /* aligne au centre */
+}
+
+.précision {
+    display: flex;
+    gap: 400px;
+    list-style: none;   /*Enlève les pouces*/
+    margin: 40px;
+}    
+
+.précision a{
+   text-decoration: none;   /*Enlève les soulignements*/
+   color: rgb(135, 23, 240);
+}
+
+.thème {
+   color: rgb(10, 10, 11);
+   font-weight: 800; /* Mettre en gras */
+   text-align: center;
+}
+
+.alignement{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* alignement verticale */
+  margin: 70px;
+}
+
+.groupe{
+    list-style-type: none;   /*Enlever les points noirs*/
+}
+
+.date, .guide, .intro h2, .tache, .calendrier h2 {
+  text-align: center;
+}
+
+.saut de page{
+    margin-top: 1500px;  /*Espace blanc au dessus*/
+    margin-bottom: 1600px;  /*Espace blanc au dessous*/
+}
+
+.intro p, .calendrier h3{
+    margin: 50px;
+}
+
+.intro h3 p, .calendrier h3 p, .calendrier h3 br p, .para, .groupe h3 li, .mentor h4{
+    font-weight: normal;  /*Enlever le gras du texte*/
+}
+
+.image { 
+    display: flex;
+    gap: 3px;
+    flex-direction: row;  /*Met l'image en ligne */
+    justify-content: center;
+    /*retour à laligne si ça dépasse */
+}
+
+.image img{
+   width: 300px;
+   height: 300px;
+   object-fit: contain;
+}
+
+
+

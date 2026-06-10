@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MentorLink — Finalise ton inscription</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { brand: '#0965F0', ink: '#1B2330', muted: '#52607A', line: '#D9E5F8' },
+      fontFamily: { sans: ['Poppins', 'sans-serif'] }
+    }}}
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    html, body { height: 100%; }
+    /* meme fond que index.html pour harmoniser */
+    body { font-family: 'Poppins', sans-serif; color: #1B2330; background: #A8C0E4; overflow: hidden; }
+    input, textarea, select, button { font-family: inherit; }
+    .wstep { display: none; }
+    .wstep.active { display: block; animation: fade .3s ease both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .chip.sel, .pill.sel { background: #0965F0; color: #fff; border-color: #0965F0; }
+    .no-sb { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-sb::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="h-screen">
+
+  <div class="h-screen max-w-md mx-auto flex flex-col px-6">
+
+    <!-- Haut : retour + dots + passer -->
+    <div id="topbar" class="flex items-center gap-3 pt-6" style="visibility:hidden">
+      <button id="back" onclick="prev()" class="text-brand hover:opacity-70 transition"><i data-lucide="arrow-left" class="w-6 h-6 stroke-[2.5]"></i></button>
+      <div id="dots" class="flex-1 flex items-center justify-center gap-1.5"></div>
+      <button id="skip" onclick="next()" class="text-sm text-muted font-medium hover:text-ink transition">Passer</button>
+    </div>
+
+    <div class="flex-1 relative">
+
+      <!-- INTRO -->
+      <section data-step="0" class="wstep active absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <img src="./assets/img/signup.png" class="h-52 object-contain mb-5" />
+          <h1 class="text-2xl font-extrabold">Finalisons ton inscription</h1>
+          <p class="text-muted text-sm mt-2 max-w-xs">Quelques infos pour qu'on te propose les bons mentors. Ça prend moins d'une minute.</p>
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Commencer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 1 : PHOTO -->
+      <section data-step="1" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Ajoute une photo</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Une photo aide les autres à te reconnaître.</p>
+          <div class="relative mt-8">
+            <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="onPickPhoto(this)" />
+            <div id="photoCircle" onclick="document.getElementById('photoInput').click()" class="w-32 h-32 rounded-full bg-white border border-line flex items-center justify-center text-muted overflow-hidden cursor-pointer"><i data-lucide="user" class="w-14 h-14"></i></div>
+            <button type="button" onclick="document.getElementById('photoInput').click()" class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center border-2 border-white"><i data-lucide="camera" class="w-4 h-4"></i></button>
+          </div>
+          <p class="text-xs text-muted mt-3">JPG ou PNG, 2 Mo max</p>
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Continuer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 2 : FILIÈRE & NIVEAU -->
+      <section data-step="2" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Ta filière et ton niveau</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Ça sert à te proposer des mentors proches de toi.</p>
+
+          <p class="text-sm font-semibold mt-8 mb-2">Filière</p>
+          <div data-group="filiere" class="flex flex-wrap justify-center gap-2" onclick="pickOne(event)">
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">IA</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium sel">GL</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">SI</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">IM</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">SE&IoT</button>
+          </div>
+
+          <p class="text-sm font-semibold mt-6 mb-2">Niveau</p>
+          <div data-group="niveau" class="flex flex-wrap justify-center gap-2" onclick="pickOne(event)">
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Licence 1</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium sel">Licence 2</button>
+            <button type="button" class="pill px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Licence 3</button>
+          </div>
+
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Continuer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 3 : FORCES -->
+      <section data-step="3" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Tes points forts</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Les matières que tu maîtrises et peux enseigner.</p>
+          <div class="flex flex-wrap justify-center gap-2 mt-7" onclick="toggleChip(event)">
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Programmation Python</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Algorithmique</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Bases de données</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">SQL</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Développement web</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">HTML/CSS</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Java</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">POO</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Mathématiques</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Statistiques</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Réseaux</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Anglais</button>
+          </div>
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Continuer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 4 : LACUNES -->
+      <section data-step="4" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Tes lacunes</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Les matières où tu cherches de l'aide.</p>
+          <div class="flex flex-wrap justify-center gap-2 mt-7" onclick="toggleChip(event)">
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Programmation Python</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Algorithmique</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Bases de données</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">SQL</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Développement web</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">HTML/CSS</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Java</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">POO</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Mathématiques</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Statistiques</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Réseaux</button>
+            <button type="button" class="chip px-4 h-10 rounded-full border border-line bg-white text-sm font-medium">Anglais</button>
+          </div>
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Continuer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 5 : DISPONIBILITÉS -->
+      <section data-step="5" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Tes disponibilités</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Quand es-tu libre pour du mentorat ?</p>
+          <div class="grid grid-cols-3 gap-2 mt-7 w-full">
+            <select id="jour" class="h-11 bg-white border border-line rounded-xl px-3 text-sm focus:border-brand focus:ring-2 focus:ring-brand/15 focus:outline-none transition">
+              <option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option>
+            </select>
+            <input id="hd" type="time" value="14:00" class="h-11 bg-white border border-line rounded-xl px-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/15 focus:outline-none transition" />
+            <input id="hf" type="time" value="16:00" class="h-11 bg-white border border-line rounded-xl px-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/15 focus:outline-none transition" />
+          </div>
+          <button type="button" onclick="addDispo()" class="mt-3 flex items-center gap-1.5 text-brand text-sm font-semibold hover:underline"><i data-lucide="plus" class="w-4 h-4"></i> Ajouter ce créneau</button>
+          <div id="dispoList" class="space-y-2 mt-5 w-full"></div>
+          <button onclick="next()" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Continuer <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- ÉTAPE 6 : BIO -->
+      <section data-step="6" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <h1 class="text-2xl font-extrabold">Parle un peu de toi</h1>
+          <p class="text-muted text-sm mt-1 max-w-xs">Une courte bio pour te présenter.</p>
+          <textarea id="bio" rows="5" placeholder="Ex : Étudiant en GL passionné de dev web, j'aime aider sur Python…" class="w-full mt-7 bg-white border border-line rounded-xl px-4 py-3 text-sm text-left focus:border-brand focus:ring-2 focus:ring-brand/15 focus:outline-none transition"></textarea>
+          <label class="flex items-center gap-2.5 mt-4 w-full text-left text-sm cursor-pointer">
+            <input id="showPhone" type="checkbox" class="w-4 h-4 accent-brand" />
+            <span>Afficher mon numéro de téléphone sur mon profil</span>
+          </label>
+          <button onclick="finishSignup()" class="mt-6 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Terminer <i data-lucide="check" class="w-4 h-4"></i></button>
+        </div>
+      </section>
+
+      <!-- FIN -->
+      <section data-step="7" class="wstep absolute inset-0 overflow-y-auto no-sb">
+        <div class="min-h-full flex flex-col items-center justify-center text-center py-6">
+          <img src="./assets/img/check.png" class="w-24 h-24 object-contain mb-5" />
+          <h1 class="text-2xl font-extrabold">Ton profil est prêt !</h1>
+          <p class="text-muted text-sm mt-2 max-w-xs">On va pouvoir te proposer les meilleurs mentors selon tes compétences et tes besoins.</p>
+          <a href="dashboard.html" class="mt-8 w-full h-11 rounded-full bg-brand text-white font-semibold hover:brightness-110 transition flex items-center justify-center gap-2">Aller au tableau de bord <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    // On doit avoir les infos de base saisies à l'étape inscription
+    if (!sessionStorage.getItem('ml_signup')) location.href = 'index.html';
+
+    let step = 0;
+    const TOTAL = 6;
+    const optional = [1, 5, 6];
+
+    function render() {
+      document.querySelectorAll('.wstep').forEach(s => s.classList.toggle('active', +s.dataset.step === step));
+      const isForm = step >= 1 && step <= TOTAL;
+      document.getElementById('topbar').style.visibility = isForm ? 'visible' : 'hidden';
+      if (isForm) {
+        let h = '';
+        for (let i = 1; i <= TOTAL; i++) {
+          const cls = i === step ? 'w-5 bg-brand' : (i < step ? 'w-2 bg-brand' : 'w-2 bg-brand/25');
+          h += '<span class="h-2 rounded-full transition-all ' + cls + '"></span>';
+        }
+        document.getElementById('dots').innerHTML = h;
+        document.getElementById('back').style.visibility = step > 1 ? 'visible' : 'hidden';
+        document.getElementById('skip').style.display = optional.includes(step) ? '' : 'none';
+      }
+      lucide.createIcons();
+    }
+    function next() { if (step < 7) { step++; render(); } }
+    function prev() { if (step > 1) { step--; render(); } }
+
+    // Photo choisie (uploadée après la création du compte)
+    let photoFile = null;
+    function onPickPhoto(input) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { toast('Image trop lourde (2 Mo max)', 'error'); input.value = ''; return; }
+      photoFile = file;
+      const circle = document.getElementById('photoCircle');
+      circle.innerHTML = '<img src="' + URL.createObjectURL(file) + '" class="w-full h-full object-cover" alt="" />';
+    }
+
+    function toggleChip(e) { const b = e.target.closest('.chip'); if (b) b.classList.toggle('sel'); }
+    function pickOne(e) {
+      const b = e.target.closest('.pill'); if (!b) return;
+      [...b.parentElement.children].forEach(c => c.classList.remove('sel'));
+      b.classList.add('sel');
+    }
+    const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    const INP = 'h-11 bg-white border border-line rounded-xl px-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/15 focus:outline-none transition';
+    function addDispo() {
+      const j = document.getElementById('jour').value;
+      const d = document.getElementById('hd').value, f = document.getElementById('hf').value;
+      const opts = JOURS.map(x => '<option' + (x === j ? ' selected' : '') + '>' + x + '</option>').join('');
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center w-full';
+      row.innerHTML =
+        '<select class="' + INP + ' px-3">' + opts + '</select>' +
+        '<input type="time" value="' + d + '" class="' + INP + '" />' +
+        '<input type="time" value="' + f + '" class="' + INP + '" />' +
+        '<button type="button" class="w-9 h-9 flex items-center justify-center text-muted hover:text-ink" onclick="this.parentElement.remove()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+      document.getElementById('dispoList').appendChild(row);
+      lucide.createIcons();
+    }
+
+    // ---- Finalisation : on assemble tout et on crée le compte ----
+    async function finishSignup() {
+      const raw = sessionStorage.getItem('ml_signup');
+      if (!raw) { toast('Session expirée, recommence l\'inscription.', 'error'); setTimeout(() => location.href = 'index.html', 1200); return; }
+      const signup = JSON.parse(raw);
+
+      const fEl = document.querySelector('[data-group="filiere"] .pill.sel');
+      const nEl = document.querySelector('[data-group="niveau"] .pill.sel');
+      const competences = [...document.querySelectorAll('[data-step="3"] .chip.sel')].map(c => c.textContent.trim());
+      const lacunes     = [...document.querySelectorAll('[data-step="4"] .chip.sel')].map(c => c.textContent.trim());
+      const disponibilites = [...document.querySelectorAll('#dispoList > div')].map(r => {
+        const s = r.querySelector('select');
+        const t = r.querySelectorAll('input[type=time]');
+        return s.value + ' ' + t[0].value + '-' + t[1].value;
+      });
+      const bio = (document.getElementById('bio').value || '').trim();
+
+      const payload = Object.assign({}, signup, {
+        filiere: fEl ? fEl.textContent.trim() : 'GL',
+        niveau:  nEl ? nEl.textContent.trim() : 'Licence 1',
+        bio, competences, lacunes, disponibilites,
+        afficher_telephone: document.getElementById('showPhone').checked
+      });
+
+      try {
+        await registerUser(payload);
+        await login(signup.email, signup.password); // connexion automatique
+        if (photoFile) { try { await uploadFile('/users/me/photo', photoFile); } catch (_) {} }
+        sessionStorage.removeItem('ml_signup');
+        next(); // affiche l'écran « Ton profil est prêt ! »
+      } catch (err) {
+        toast(err.message || 'Inscription impossible. Vérifie tes informations.', 'error');
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -3,4 +3,7 @@ __pycache__/
 *.pyc
 .DS_Store
 node_modules/
-venv/
+
+# Fichiers uploadés (photos de profil) — ne pas versionner
+backend/uploads/
+!backend/uploads/.gitkeep

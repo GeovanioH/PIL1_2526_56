@@ -16,6 +16,7 @@ class RegisterRequest(BaseModel):
     competences: Optional[list[str]] = None
     lacunes: Optional[list[str]] = None
     disponibilites: Optional[list[str]] = None
+    afficher_telephone: Optional[bool] = False
 
     @field_validator("password")
     @classmethod
@@ -27,10 +28,9 @@ class RegisterRequest(BaseModel):
     @field_validator("telephone")
     @classmethod
     def validate_telephone(cls, v):
-        # Accepte formats internationaux : +22960XXXXXX, 06XXXXXXXX, etc.
-        cleaned = v.replace(" ", "").replace("-", "")
-        if not (cleaned.lstrip("+").isdigit() and 8 <= len(cleaned.lstrip("+")) <= 15):
-            raise ValueError("Numéro de téléphone invalide")
+        cleaned = "".join(c for c in (v or "") if c.isdigit())
+        if len(cleaned) != 10:
+            raise ValueError("Le numéro de téléphone doit contenir exactement 10 chiffres")
         return cleaned
 
 
@@ -50,6 +50,17 @@ class UserUpdateRequest(BaseModel):
     competences: Optional[list[str]] = None
     lacunes: Optional[list[str]] = None
     disponibilites: Optional[list[str]] = None
+    afficher_telephone: Optional[bool] = None
+
+    @field_validator("telephone")
+    @classmethod
+    def validate_telephone(cls, v):
+        if v is None:
+            return v
+        cleaned = "".join(c for c in v if c.isdigit())
+        if len(cleaned) != 10:
+            raise ValueError("Le numéro de téléphone doit contenir exactement 10 chiffres")
+        return cleaned
 
 
 class UserResponse(BaseModel):
@@ -57,7 +68,7 @@ class UserResponse(BaseModel):
     nom: str
     prenom: str
     email: str
-    telephone: str
+    telephone: Optional[str] = None       # masqué si l'utilisateur ne l'affiche pas
     filiere: str
     niveau: str
     bio: Optional[str] = None
@@ -65,6 +76,7 @@ class UserResponse(BaseModel):
     competences: Optional[list[str]] = None
     lacunes: Optional[list[str]] = None
     disponibilites: Optional[list[str]] = None
+    afficher_telephone: Optional[bool] = None
     created_at: Optional[datetime] = None
 
     class Config:

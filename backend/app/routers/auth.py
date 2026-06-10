@@ -31,6 +31,23 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
+# ── VÉRIFICATION DISPONIBILITÉ (email / téléphone) ────────────────────────────
+
+class AvailabilityRequest(BaseModel):
+    email: str
+    telephone: Optional[str] = None
+
+
+@router.post("/check-availability")
+def check_availability(payload: AvailabilityRequest, db: Session = Depends(get_db)):
+    """Vérifie si l'email (et le téléphone) sont déjà utilisés — appelé dès l'inscription."""
+    email_pris = db.query(User).filter(User.email == payload.email).first() is not None
+    tel_pris = False
+    if payload.telephone:
+        tel_pris = db.query(User).filter(User.telephone == payload.telephone).first() is not None
+    return {"email_disponible": not email_pris, "telephone_disponible": not tel_pris}
+
+
 # ── INSCRIPTION ───────────────────────────────────────────────────────────────
 
 @router.post("/register", status_code=201)
@@ -56,6 +73,7 @@ def register(user_data: RegisterRequest, db: Session = Depends(get_db)):
         competences=user_data.competences or [],
         lacunes=user_data.lacunes or [],
         disponibilites=user_data.disponibilites or [],
+        afficher_telephone=bool(user_data.afficher_telephone),
     )
 
     db.add(new_user)

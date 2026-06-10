@@ -25,6 +25,19 @@ def create_offre(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Empêche de publier deux fois la même offre (mêmes matières + dispos + format)
+    new_mat = sorted(offre_data.matieres or [])
+    new_dispo = sorted(offre_data.disponibilites or [])
+    new_fmt = offre_data.format or "les deux"
+    for o in db.query(Offre).filter(Offre.user_id == current_user.id).all():
+        if (sorted(o.matieres or []) == new_mat
+                and sorted(o.disponibilites or []) == new_dispo
+                and (o.format or "les deux") == new_fmt):
+            raise HTTPException(
+                status_code=400,
+                detail="Tu as déjà publié cette offre (même matière et mêmes disponibilités)."
+            )
+
     nouvelle_offre = Offre(
         titre=offre_data.titre,
         description=offre_data.description,
@@ -37,6 +50,19 @@ def create_offre(
     db.add(nouvelle_offre)
     db.commit()
     db.refresh(nouvelle_offre)
+
+    # Notifier tous les autres utilisateurs de la nouvelle offre
+    autres = db.query(User).filter(User.id != current_user.id).all()
+    for u in autres:
+        db.add(Notification(
+            user_id=u.id,
+            type="nouvelle_offre",
+            contenu=f"{current_user.prenom} a publié une nouvelle offre de mentorat",
+            reference_id=nouvelle_offre.id
+        ))
+    if autres:
+        db.commit()
+
     return nouvelle_offre
 
 

@@ -23,6 +23,19 @@ def create_demande(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Empêche de publier deux fois la même demande (mêmes matières + dispos + format)
+    new_mat = sorted(demande_data.matieres or [])
+    new_dispo = sorted(demande_data.disponibilites or [])
+    new_fmt = demande_data.format or "les deux"
+    for d in db.query(Demande).filter(Demande.user_id == current_user.id).all():
+        if (sorted(d.matieres or []) == new_mat
+                and sorted(d.disponibilites or []) == new_dispo
+                and (d.format or "les deux") == new_fmt):
+            raise HTTPException(
+                status_code=400,
+                detail="Tu as déjà publié cette demande (même matière et mêmes disponibilités)."
+            )
+
     nouvelle_demande = Demande(
         titre=demande_data.titre,
         description=demande_data.description,
@@ -35,6 +48,19 @@ def create_demande(
     db.add(nouvelle_demande)
     db.commit()
     db.refresh(nouvelle_demande)
+
+    # Notifier tous les autres utilisateurs de la nouvelle demande
+    autres = db.query(User).filter(User.id != current_user.id).all()
+    for u in autres:
+        db.add(Notification(
+            user_id=u.id,
+            type="nouvelle_demande",
+            contenu=f"{current_user.prenom} a publié une nouvelle demande de mentorat",
+            reference_id=nouvelle_demande.id
+        ))
+    if autres:
+        db.commit()
+
     return nouvelle_demande
 
 

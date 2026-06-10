@@ -22,6 +22,9 @@ class User(Base):
     lacunes = Column(JSON, nullable=True, default=list)
     disponibilites = Column(JSON, nullable=True, default=list)
 
+    # L'utilisateur choisit d'afficher (ou non) son numéro sur son profil public
+    afficher_telephone = Column(Boolean, default=False, nullable=False)
+
     # Reset mot de passe
     reset_token = Column(String(255), nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)

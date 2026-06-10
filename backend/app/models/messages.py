@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -23,6 +23,10 @@ class Message(Base):
     )
 
     contenu = Column(Text, nullable=False)
+
+    # Pièce jointe (optionnelle) : URL du fichier + nom d'origine
+    fichier_url = Column(String(500), nullable=True)
+    fichier_nom = Column(String(255), nullable=True)
 
     # CDC : permet de savoir si le message a été lu (notifications)
     lu = Column(Boolean, default=False)

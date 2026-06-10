@@ -1,14 +1,47 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+import os
+import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.database import get_db, PUBLIC_URL
 from app.models.user import User
 from app.models.notification import Notification
+from app.models.blocage import Blocage
 from app.schemas.user import UserResponse, UserUpdateRequest
 from app.services.security_service import get_current_user
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+
+# ── UPLOAD DE LA PHOTO DE PROFIL ───────────────────────────────────────────────
+
+@router.post("/me/photo")
+def upload_photo(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Reçoit une image, la sauvegarde dans /uploads et stocke son URL."""
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".gif", ".webp"):
+        raise HTTPException(status_code=400, detail="Format d'image non supporté (JPG, PNG, GIF, WEBP)")
+
+    os.makedirs("uploads", exist_ok=True)
+    filename = f"{uuid.uuid4().hex}{ext}"
+    path = os.path.join("uploads", filename)
+
+    contenu = file.file.read()
+    if len(contenu) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image trop lourde (2 Mo maximum)")
+    with open(path, "wb") as f:
+        f.write(contenu)
+
+    current_user.photo_url = f"{PUBLIC_URL}/uploads/{filename}"
+    db.commit()
+    return {"photo_url": current_user.photo_url}
 
 
 @router.get("/me", response_model=UserResponse)
@@ -45,6 +78,73 @@ def delete_my_account(
     db.commit()
 
 
+# ── BLOCAGE D'UTILISATEURS ─────────────────────────────────────────────────────
+
+@router.post("/me/block/{user_id}", status_code=201)
+def block_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Bloque un utilisateur : plus de messagerie ni de matching entre les deux."""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas vous bloquer vous-même")
+
+    cible = db.query(User).filter(User.id == user_id).first()
+    if not cible:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+
+    existant = db.query(Blocage).filter(
+        Blocage.bloqueur_id == current_user.id,
+        Blocage.bloque_id == user_id
+    ).first()
+    if not existant:
+        db.add(Blocage(bloqueur_id=current_user.id, bloque_id=user_id))
+        db.commit()
+
+    return {"message": "Utilisateur bloqué"}
+
+
+@router.delete("/me/block/{user_id}", status_code=204)
+def unblock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Débloque un utilisateur."""
+    db.query(Blocage).filter(
+        Blocage.bloqueur_id == current_user.id,
+        Blocage.bloque_id == user_id
+    ).delete()
+    db.commit()
+
+
+@router.get("/me/blocks")
+def get_my_blocks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des ids d'utilisateurs que j'ai bloqués."""
+    rows = db.query(Blocage.bloque_id).filter(Blocage.bloqueur_id == current_user.id).all()
+    return {"blocked_ids": [r[0] for r in rows]}
+
+
+@router.get("/by-email")
+def find_user_by_email(
+    email: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trouve un utilisateur par son email (pour démarrer une conversation)."""
+    cible = (email or "").strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == cible).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Aucun utilisateur n'utilise cet email.")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="C'est ta propre adresse email.")
+    return {"id": user.id, "prenom": user.prenom, "nom": user.nom}
+
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user_profile(
     user_id: int,
@@ -54,7 +154,12 @@ def get_user_profile(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-    return user
+
+    resp = UserResponse.model_validate(user)
+    # On masque le numéro des autres s'ils n'ont pas choisi de l'afficher
+    if user.id != current_user.id and not bool(user.afficher_telephone):
+        resp.telephone = None
+    return resp
 
 
 # ── NOTIFICATIONS ─────────────────────────────────────────────────────────────

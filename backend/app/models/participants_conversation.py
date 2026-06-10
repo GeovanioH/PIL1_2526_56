@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -20,6 +20,11 @@ class ParticipantConversation(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
+
+    # Suppression "côté utilisateur" : date à laquelle CE participant a supprimé la
+    # conversation. Il ne verra plus que les messages postérieurs à cette date — un
+    # nouveau message apparaît alors comme une nouvelle conversation. L'autre garde tout.
+    supprime_le = Column(DateTime, nullable=True)
 
     conversation = relationship(
         "Conversation",

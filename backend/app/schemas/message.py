@@ -14,6 +14,8 @@ class MessageResponse(BaseModel):
     conversation_id: int
     lu: bool
     envoye_a: Optional[datetime] = None
+    fichier_url: Optional[str] = None
+    fichier_nom: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -8,6 +8,10 @@ load_dotenv()
 # URL PostgreSQL
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# URL publique du backend (pour construire les liens des fichiers uploadés).
+# En local : http://127.0.0.1:8000 ; en ligne : l'URL Render (variable d'env PUBLIC_URL).
+PUBLIC_URL = os.getenv("PUBLIC_URL", "http://127.0.0.1:8000").rstrip("/")
+
 # Vérifie que la variable existe
 if not DATABASE_URL:
     raise ValueError(
@@ -17,8 +21,8 @@ if not DATABASE_URL:
 # Engine SQLAlchemy
 engine = create_engine(
     DATABASE_URL,
-    # Affiche les requêtes SQL — mettre False en production
-    echo=True,
+    # Affiche les requêtes SQL — False pour de meilleures performances
+    echo=False,
     # Nombre de connexions permanentes
     pool_size=10,
     # Connexions supplémentaires temporaires

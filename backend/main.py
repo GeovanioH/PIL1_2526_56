@@ -1,6 +1,9 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
 
@@ -14,11 +17,20 @@ from app.models.participants_conversation import ParticipantConversation
 from app.models.notification import Notification
 from app.models.reponse_offre import ReponseOffre
 from app.models.reponse_demande import ReponseDemande
+from app.models.blocage import Blocage
 
 from app.routers import auth, users, matching, messages, offres, demandes
 
 # Création automatique des tables
 Base.metadata.create_all(bind=engine)
+
+# Migration légère : ajoute les colonnes de pièce jointe si la table messages existe déjà
+from sqlalchemy import text
+with engine.begin() as conn:
+    conn.execute(text("ALTER TABLE messages ADD COLUMN IF NOT EXISTS fichier_url VARCHAR(500)"))
+    conn.execute(text("ALTER TABLE messages ADD COLUMN IF NOT EXISTS fichier_nom VARCHAR(255)"))
+    conn.execute(text("ALTER TABLE participants_conversation ADD COLUMN IF NOT EXISTS supprime_le TIMESTAMP"))
+    conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS afficher_telephone BOOLEAN DEFAULT FALSE"))
 
 app = FastAPI(
     title="IFRI_MentorLink API",
@@ -38,6 +50,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── FICHIERS UPLOADÉS (photos de profil) ───────────────────────────────────────
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 # ── HANDLER D'ERREURS GLOBAL ──────────────────────────────────────────────────

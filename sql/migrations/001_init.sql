@@ -1,0 +1,22 @@
+-- Migration 001 : Initialisation de la base de données IFRI_MentorLink
+-- Date : 10 juin 2026
+-- Description : Création de la structure initiale des tables
+
+-- Cette migration correspond à la version initiale du schema.sql
+-- Les tables sont créées via SQLAlchemy au démarrage du backend
+-- Ce fichier documente la structure initiale pour référence
+
+-- Tables créées :
+-- 1. matieres
+-- 2. utilisateurs
+-- 3. competences
+-- 4. disponibilites
+-- 5. reinitialisations_mdp
+-- 6. offres_mentorat
+-- 7. demandes_mentorat
+-- 8. reponses
+-- 9. matchings
+-- 10. conversations
+-- 11. participants_conversation
+-- 12. messages
+-- 13. notifications
